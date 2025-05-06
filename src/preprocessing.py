@@ -13,7 +13,7 @@ class CategTargetEncoding(TransformerMixin, BaseEstimator):
 
         tmp = pd.concat([X, y], axis=1)
         for col in X.columns:
-            self.encoding = tmp.groupby(col)[y.name].mean().to_dict()
+            self.encoding[col] = tmp.groupby(col)[y.name].mean().to_dict()
         return self
     
     def transform(self, X):
@@ -32,13 +32,13 @@ class CategoricalFeatures(BaseEstimator, TransformerMixin):
         for feature in X:
             if self.is_categ(X[feature], max_unique=self.max_unique):
                 self.categorical_features.append(feature)
-                self.categories[feature] = X[feature].fillna("nan").astype('category').cat.categories
+                self.categories[feature] = X[feature].fillna("nan").astype(str).astype('category').cat.categories
         return self
     
     def transform(self, X: pd.DataFrame):
         for feature in self.categorical_features:
             if feature in X.columns:
-                X[feature] = pd.Categorical(X[feature].fillna("nan"), categories=self.categories[feature])
+                X[feature] = pd.Categorical(X[feature].fillna("nan").astype(str), categories=self.categories[feature])
                 X[feature].is_category = True
         return X
     
