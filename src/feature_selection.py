@@ -55,7 +55,7 @@ def backward_selection(X, y, model, metric: Callable) -> List:
         else:
             preds = model.predict(x_valid[current_features])
         current_metric = metric(y_valid, preds)
-        if current_metric > eval_metric:
+        if current_metric >= eval_metric:
             eval_metric = current_metric
             features.remove(feat)
     return features
