@@ -2,7 +2,7 @@ import optuna
 import numpy as np
 
 from typing import Callable
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from ..src.metrics import mape
 
@@ -34,10 +34,10 @@ def parse_optuna_params(trial: optuna.Trial, params: dict) -> dict:
     return optuna_params
 
 
-def objective(trial: optuna.Trial, X, y, params: dict, core_model) -> float:
+def objective(trial: optuna.Trial, X, y, params: dict, core_model: Callable, metric: Callable) -> float:
     params = parse_optuna_params(trial, params)
     model = core_model(**params)
-    result = model_bootstrap(X, y, model=model, N=100, is_tqdm=False)
+    result = model_bootstrap(X, y, model=model, N=100, is_tqdm=False, metric=metric)
     return np.mean(result)
                 
 

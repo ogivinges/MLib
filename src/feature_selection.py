@@ -3,12 +3,12 @@ import numpy as np
 
 from typing import Callable, List, Dict
 from sklearn.model_selection import train_test_split
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 from .metrics import mape
 from .utils import is_categ, iv_local
 
 
-def univariative_analysis(X, y, model, metric: Callable = mape, is_tqdm: bool = False) -> Dict:
+def univariative_analysis(X: pd.DataFrame, y, model, metric: Callable = mape, is_tqdm: bool = False) -> Dict:
     res = {}
     iterator = tqdm(X.columns) if is_tqdm else X.columns
     for col in iterator:
@@ -19,7 +19,7 @@ def univariative_analysis(X, y, model, metric: Callable = mape, is_tqdm: bool = 
     return res
 
 
-def correlation_selection(X, corr_threshold: float = 0.9) -> List:
+def correlation_selection(X: pd.DataFrame, corr_threshold: float = 0.9) -> List:
     list_features = X.columns.tolist()
     correlation_matrix = X[list_features].corr()
     for itr, col in enumerate(X.columns):
@@ -38,7 +38,7 @@ def iv(series, target, nbins: int = 10):
     ).agg(lambda x: iv_local(x, N, P)).sum()
 
 
-def backward_selection(X, y, model, metric: Callable) -> List:
+def backward_selection(X: pd.DataFrame, y, model, metric: Callable) -> List:
     features = X.columns.tolist()
     x_train, x_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=42)
     model.fit(x_train, y_train)
