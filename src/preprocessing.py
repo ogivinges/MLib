@@ -55,15 +55,19 @@ class CategoricalFeatures(BaseEstimator, TransformerMixin):
     
 
 class PSICalculator():
-    def __init__(self, bins=10, epsilon=1e-6):
+    def __init__(self, bins=10, categ_transformer: CategoricalFeatures = None, epsilon=1e-6):
         self.bins = bins
+        self.categ_transformer = categ_transformer
         self.epsilon = epsilon
 
     def fit(self, X, y=None):
         self.bins_info_ = {}
         self.expected_proportion_ = {}
         for feature in X:
-            if CategoricalFeatures.is_categ(X[feature]):
+            if (
+                (self.categ_transformer and feature in self.categ_transformer.categorical_features) 
+                or (self.categ_transformer is not None and CategoricalFeatures.is_categ(X[feature]))
+                ):
                 self._fit_categorical(X[feature])
             else:
                 self._fit_continuous(X[feature])
