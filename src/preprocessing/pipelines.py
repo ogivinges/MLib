@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 from .preprocessing import CategTargetEncoding
 
+
 class LinearPreprocessor(ColumnTransformer):
     def __init__(self, features: List, categorical_features: List):
         super().__init__(
@@ -19,8 +20,8 @@ class LinearPreprocessor(ColumnTransformer):
                     ('scaler', StandardScaler())
                 ]), [c for c in features if c not in categorical_features])
             ]
-)
-        
+        )
+
 
 class TreePreprocessor(ColumnTransformer):
     def __init__(self, features: List, categorical_features: List):
@@ -30,7 +31,8 @@ class TreePreprocessor(ColumnTransformer):
                     ('target_encoding', CategTargetEncoding())
                 ]), categorical_features),
                 ('num', Pipeline([
-                    ('imputer', SimpleImputer(fill_value=-999, strategy='constant'))
+                    ('imputer', SimpleImputer(
+                        fill_value=-999, strategy='constant'))
                 ]), [c for c in features if c not in categorical_features])
             ]
         )

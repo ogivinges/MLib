@@ -1,5 +1,6 @@
 import shap
 
+
 def shap_by_row(model, train, df, max_display=30):
     explainer = shap.TreeExplainer(model, train, feature_perturbation='interventional')
     shap_vals = explainer(df, check_additivity=False)

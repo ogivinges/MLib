@@ -1,9 +1,49 @@
 from collections.abc import Iterable
-from typing import Optional
+from typing import Literal
 
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
+
+from .mlmodels import MeanModel
+
+
+class MLModel:
+    def __init__(
+            self, core: Literal["lightgbm", "mean"] = "lightgbm",
+            problem_type: Literal["binary", "regression"] = "binary",
+            **kwargs):
+        self.core = core
+        self.problem_type = problem_type
+        if self.core == "lightgbm":
+            if self.problem_type == "binary":
+                self._model = lgb.LGBMClassifier(**kwargs)
+            elif self.problem_type == "regression":
+                self._model = lgb.LGBMRegressor(**kwargs)
+        elif self.core == "mean":
+            if self.problem_type == "regression":
+                self._model = MeanModel()
+            else:
+                ValueError("MeanModel can be used only for regression")
+        else:
+            ValueError(f"Core '{self.core}' can't be used")
+
+    def fit(
+            self, train_x, train_y,
+            valid_x=None, valid_y=None, eval_metric=None):
+        if self.core == "lightgbm":
+            self._model.fit(
+                train_x, train_y,
+                eval_set=[(valid_x, valid_y)], eval_metric=eval_metric)
+        elif self.core == "mean":
+            self._model.fit(train_x, train_y)
+
+    def predict(self, X) -> np.ndarray:
+        if self.problem_type == "binary":
+            return self._model.predict_proba(X)[:, 1]
+        else:
+            return self._model.predict(X)
 
 
 class CascadeMLModel:
@@ -12,7 +52,6 @@ class CascadeMLModel:
         models,
         split_col: str,
         bins,
-        n_jobs: Optional[int] = None
     ):
         self.models = models
         self.cascade_col = split_col
@@ -38,3 +77,6 @@ class CascadeMLModel:
             self._models.fit(
                 X[train_idx], y[train_idx]
             )
+
+    def __getitem__(self, key):
+        return self._models[key]
