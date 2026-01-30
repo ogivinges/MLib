@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 from autogluon.tabular import TabularPredictor
 from autowoe import AutoWoE
 from sklearn.base import BaseEstimator
@@ -22,7 +21,6 @@ class AutoGluonClassifier(BaseEstimator):
         self.predictor = None
         self.verbose = verbose
 
-        
     def fit(self, X, y):
         data = X.copy()
         data['target'] = y
@@ -37,16 +35,16 @@ class AutoGluonClassifier(BaseEstimator):
             presets=self.presets
         )
         return self
-        
+
     def predict(self, X):
         return self.predictor.predict(X).values
-        
+
     def predict_proba(self, X):
         return self.predictor.predict_proba(X).values
-        
+
     def score(self, X, y):
         return self.predictor.evaluate(pd.DataFrame(X).assign(target=y))[self.eval_metric]
-    
+
 
 # Работает паршиво, хорошо бы вообще это с нуля переписать
 class AutoWoeClassifier(BaseEstimator):
@@ -56,7 +54,7 @@ class AutoWoeClassifier(BaseEstimator):
         self.n_jobs = n_jobs
         self.verbose = verbose
         self._model = AutoWoE(
-            task='BIN', 
+            task='BIN',
             th_nan=self.th_nan,
             th_cat=self.th_cat,
             n_jobs=self.n_jobs, 
@@ -64,9 +62,9 @@ class AutoWoeClassifier(BaseEstimator):
 
     def fit(self, X: pd.DataFrame, y=None):
         self._model.fit(
-            pd.concat([X, y], axis=1), 
-            target_name=y.name, 
-            features_type={key: ('cat' if val=='category' else 'real') for key, val in X.dtypes.to_dict().items()}
+            pd.concat([X, y], axis=1),
+            target_name=y.name,
+            features_type={key: ('cat' if val == 'category' else 'real') for key, val in X.dtypes.to_dict().items()}
         )
         return self
 

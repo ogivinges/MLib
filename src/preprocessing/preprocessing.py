@@ -50,12 +50,12 @@ class CategoricalFeatures(BaseEstimator, TransformerMixin):
             return True
         return series.nunique() <= max_unique
     
-    def save(self, file_name):
+    def save(self, file_name: str):
         joblib.dump(self, file_name)
     
 
 class PSICalculator():
-    def __init__(self, bins=10, categ_transformer: CategoricalFeatures = None, epsilon=1e-6):
+    def __init__(self, bins: int = 10, categ_transformer: CategoricalFeatures = None, epsilon=1e-6):
         self.bins = bins
         self.categ_transformer = categ_transformer
         self.epsilon = epsilon

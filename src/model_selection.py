@@ -39,5 +39,3 @@ def objective(trial: optuna.Trial, X, y, params: dict, core_model: Callable, met
     model = core_model(**params)
     result = model_bootstrap(X, y, model=model, N=100, is_tqdm=False, metric=metric)
     return np.mean(result)
-                
-

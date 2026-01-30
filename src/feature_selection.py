@@ -59,6 +59,3 @@ def backward_selection(X: pd.DataFrame, y, model, metric: Callable) -> List:
             eval_metric = current_metric
             features.remove(feat)
     return features
-
-
-
