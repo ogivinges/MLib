@@ -66,17 +66,28 @@ class CascadeMLModel:
             preds[idx.values] = self.models[backet].predict(data[idx])
         return preds
 
-    def fit(self, X: pd.DataFrame, y):
-        train_cascade_categs = pd.cut(X[self.cascade_col], self.bins)
+    def fit(
+            self, train_x: pd.DataFrame, train_y,
+            valid_x=None, valid_y=None, eval_metric=None):
+        train_cascade_categs = pd.cut(train_x[self.cascade_col], self.bins)
+        valid_cascade_categs = (
+            pd.cut(valid_x[self.cascade_col], self.bins)
+            if valid_x and valid_y else None
+        )
         for itr, backet in enumerate(self.bins):
             train_idx = train_cascade_categs == backet
+            if valid_cascade_categs:
+                valid_idx = valid_cascade_categs == backet
+                val_x, val_y = valid_x[valid_idx], valid_y[valid_idx]
+            else:
+                val_x, val_y = None, None
             if isinstance(self.models, Iterable):
                 self._models[backet] = clone(self.models[itr])
             else:
                 self._models[backet] = clone(self.models)
             self._models.fit(
-                X[train_idx], y[train_idx]
-            )
+                train_x[train_idx], train_y[train_idx],
+                valid_x=val_x, valid_y=val_y, eval_metric=eval_metric)
 
     def __getitem__(self, key):
         return self._models[key]
