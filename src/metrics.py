@@ -15,11 +15,7 @@ class ThresholdOptimizer:
         - "youden": максимизация индекса Йодена (Youden's J statistic)
     """
 
-    __METHODS = {"f1", "youden"}
-
     def __init__(self, method: Literal["f1", "youden"] = "f1"):
-        if method not in self.__METHODS:
-            raise ValueError(f"method {method} is not acceptable!")
         self.method = method
 
     def optimize(self, y_true, y_pred) -> float:
@@ -38,16 +34,18 @@ class ThresholdOptimizer:
         float
             Оптимальный порог.
         """
-        if self.method == "f1":
-            return self._optimize_f1(y_true, y_pred)
+        if self.method.startswith("f") and self.method[1:].isdigit():
+            f_num = float(self.method[1:]) if self.method[2] != '0' else float('0.'+self.method[2:])
+            return self._optimize_f(y_true, y_pred, f_num=f_num)
         elif self.method == "youden":
             return self._optimize_yoden(y_true, y_pred)
 
     @staticmethod
-    def _optimize_f1(y_true, y_pred) -> float:
+    def _optimize_f(y_true, y_pred, **kwargs) -> float:
+        f_num = kwargs.get('f_num', 1)
         precision, recall, thresholds = precision_recall_curve(y_true, y_pred)
-        f1_scores = 2 * (precision * recall) / (precision + recall + 1e-9)
-        optimal_idx = np.argmax(f1_scores)
+        f_scores = (1 + f_num**2) * (precision * recall) / (f_num**2 * precision + recall + 1e-9)
+        optimal_idx = np.argmax(f_scores)
         return thresholds[optimal_idx]
 
     @staticmethod
